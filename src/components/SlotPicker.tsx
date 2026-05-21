@@ -59,7 +59,8 @@ function DigitWheel({ value, onChange }: { value: number; onChange: (v: number) 
     <div style={{
       position: 'relative',
       height: ITEM_H * VISIBLE,
-      width: 56,
+      flex: 1,
+      minWidth: 0,
       userSelect: 'none',
       touchAction: 'none',
     }}>

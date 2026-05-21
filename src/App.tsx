@@ -117,10 +117,56 @@ function App() {
         {page === 'ref' && <QuickReference />}
       </div>
 
+      {/* 制作者 */}
+      <div style={{ padding: '20px 16px 0' }}>
+        <div style={{
+          background: '#FFF',
+          borderRadius: 18,
+          padding: '18px 20px',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+          border: '1px solid rgba(0,0,0,0.04)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+        }}>
+          <div style={{
+            width: 48,
+            height: 48,
+            borderRadius: 14,
+            background: 'linear-gradient(135deg, #2563EB, #3B82F6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 24,
+            flexShrink: 0,
+          }}>
+            👨‍⚕️
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#1E293B' }}>Dr いわたつ</div>
+            <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>糖尿病・内分泌内科 専門医</div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <a href="https://www.instagram.com/dr.iwatatsu/" target="_blank" rel="noopener noreferrer" style={{
+                fontSize: 11, fontWeight: 600, color: '#E1306C', textDecoration: 'none',
+                background: '#FFF0F5', padding: '4px 10px', borderRadius: 6, border: '1px solid #FECDD3',
+              }}>
+                Instagram
+              </a>
+              <a href="https://driwatatsu.readdy.co/" target="_blank" rel="noopener noreferrer" style={{
+                fontSize: 11, fontWeight: 600, color: '#2563EB', textDecoration: 'none',
+                background: '#EFF6FF', padding: '4px 10px', borderRadius: 6, border: '1px solid #BFDBFE',
+              }}>
+                Homepage
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* フッター */}
       <div style={{
         textAlign: 'center',
-        padding: '24px 16px 32px',
+        padding: '16px 16px 32px',
         fontSize: 11,
         color: '#94A3B8',
         lineHeight: 1.6,

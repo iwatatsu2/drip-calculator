@@ -247,6 +247,8 @@ const panelStyle: React.CSSProperties = {
   borderRadius: 18,
   padding: 14,
   transition: 'all 0.2s ease',
+  minWidth: 0,
+  overflow: 'hidden',
 };
 
 const panelHeaderStyle: React.CSSProperties = {
