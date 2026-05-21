@@ -124,7 +124,7 @@ export function MultiBagManager() {
             </div>
 
             {/* 入力フォーム */}
-            <div style={{ padding: '14px 18px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ padding: '14px 18px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, overflow: 'hidden' }}>
               <div>
                 <label style={labelStyle}>薬剤名</label>
                 <input
@@ -318,10 +318,12 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: '100%',
   minWidth: 0,
+  maxWidth: '100%',
   padding: '10px 12px',
   borderRadius: 10,
   border: '1.5px solid #E2E8F0',
   fontSize: 14,
   boxSizing: 'border-box',
   background: '#FAFBFC',
+  WebkitAppearance: 'none',
 };
