@@ -1,13 +1,13 @@
 import { useState, useMemo } from 'react';
-import { calcDripsPerMin, calcDripInterval, type DripType } from '../utils/dripCalc';
+import { calcFlowRate, calcDripsPerMin, calcDripInterval, type DripType } from '../utils/dripCalc';
 import { useMetronome } from '../hooks/useMetronome';
 import { DripAnimation } from './DripAnimation';
 import { FlowRatePicker } from './SlotPicker';
 
-type InputMode = 'flow' | 'volume';
+type InputMode = 'volume' | 'flow';
 
 export function DripCalculator() {
-  const [mode, setMode] = useState<InputMode>('flow');
+  const [mode, setMode] = useState<InputMode>('volume');
 
   // 流速直接入力モード
   const [flowRate, setFlowRate] = useState(80);
@@ -19,10 +19,9 @@ export function DripCalculator() {
   const [dripType, setDripType] = useState<DripType>(20);
   const { isPlaying, start, stop } = useMetronome();
 
-  const effectiveFlow = mode === 'flow' ? flowRate : (timeH > 0 ? volume / timeH : 0);
+  const effectiveFlow = mode === 'flow' ? flowRate : (timeH > 0 ? calcFlowRate(volume, timeH) : 0);
   const dripsPerMin = useMemo(() => {
     if (mode === 'flow') {
-      // 流速 → 滴下数: flowRate * dripFactor / 60
       return effectiveFlow * dripType / 60;
     }
     return calcDripsPerMin(volume, timeH, dripType);
@@ -39,119 +38,138 @@ export function DripCalculator() {
 
   return (
     <div style={{ padding: '20px 16px' }}>
-      {/* 入力モード切替 */}
+      {/* 左右2カラム入力 */}
       <div style={{
-        display: 'flex',
-        background: '#F1F5F9',
-        borderRadius: 12,
-        padding: 3,
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 10,
         marginBottom: 16,
       }}>
-        {([
-          { key: 'flow', label: '流速で設定' },
-          { key: 'volume', label: '量×時間で設定' },
-        ] as const).map(m => (
-          <button
-            key={m.key}
-            onClick={() => { setMode(m.key); stop(); }}
-            style={{
-              flex: 1,
-              padding: '10px 0',
-              borderRadius: 10,
-              border: 'none',
-              fontSize: 13,
-              fontWeight: mode === m.key ? 700 : 500,
-              color: mode === m.key ? '#FFF' : '#64748B',
-              background: mode === m.key ? 'linear-gradient(135deg, #2563EB, #3B82F6)' : 'transparent',
-              boxShadow: mode === m.key ? '0 2px 8px rgba(37,99,235,0.25)' : 'none',
-              cursor: 'pointer',
-            }}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
+        {/* 左: 量×時間 */}
+        <div
+          onClick={() => { setMode('volume'); stop(); }}
+          style={{
+            ...panelStyle,
+            border: mode === 'volume' ? '2px solid #2563EB' : '2px solid transparent',
+            boxShadow: mode === 'volume'
+              ? '0 2px 12px rgba(37,99,235,0.15), 0 1px 3px rgba(0,0,0,0.04)'
+              : '0 2px 12px rgba(0,0,0,0.06)',
+            opacity: mode === 'volume' ? 1 : 0.55,
+            cursor: 'pointer',
+          }}
+        >
+          <div style={panelHeaderStyle}>
+            <span style={{
+              fontSize: 10,
+              fontWeight: 700,
+              color: mode === 'volume' ? '#2563EB' : '#94A3B8',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+            }}>
+              量×時間
+            </span>
+          </div>
 
-      {/* 入力エリア */}
-      <div style={cardStyle}>
-        {mode === 'flow' ? (
-          <>
-            <div style={sectionHeaderStyle}>
-              <span style={{ fontSize: 15, marginRight: 6 }}>🎰</span>
-              流速を選択
-            </div>
-            <FlowRatePicker
-              value={flowRate}
-              onChange={v => { setFlowRate(v); stop(); }}
-            />
-          </>
-        ) : (
-          <>
-            <div style={sectionHeaderStyle}>
-              <span style={{ fontSize: 15, marginRight: 6 }}>⚙️</span>
-              設定
-            </div>
-
-            <label style={labelStyle}>輸液量 (mL)</label>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 18, flexWrap: 'wrap' }}>
-              {[100, 250, 500, 1000].map(v => (
-                <button
-                  key={v}
-                  onClick={() => { setVolume(v); stop(); }}
-                  style={{
-                    ...chipStyle,
-                    ...(volume === v ? chipActiveStyle : chipInactiveStyle),
-                  }}
-                >
-                  {v}
-                </button>
-              ))}
-              <input
-                type="number"
-                value={volume}
-                onChange={e => { setVolume(Number(e.target.value)); stop(); }}
-                style={numInputStyle}
-                min={1}
-              />
-            </div>
-
-            <label style={labelStyle}>投与時間</label>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
-              {[1, 2, 3, 4, 6, 8, 12, 24].map(h => (
-                <button
-                  key={h}
-                  onClick={() => { setTimeH(h); stop(); }}
-                  style={{
-                    ...chipStyle,
-                    ...(timeH === h ? chipActiveStyle : chipInactiveStyle),
-                  }}
-                >
-                  {h}h
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* 滴下筒 - 共通 */}
-        <div style={{ marginTop: 16 }}>
-          <label style={labelStyle}>滴下筒タイプ</label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {([20, 60] as DripType[]).map(d => (
+          <label style={labelStyle}>輸液量 (mL)</label>
+          <div style={{ display: 'flex', gap: 4, marginBottom: 12, flexWrap: 'wrap' }}>
+            {[100, 250, 500, 1000].map(v => (
               <button
-                key={d}
-                onClick={() => { setDripType(d); stop(); }}
+                key={v}
+                onClick={e => { e.stopPropagation(); setVolume(v); setMode('volume'); stop(); }}
                 style={{
-                  ...chipStyle,
-                  flex: 1,
-                  padding: '10px 8px',
-                  ...(dripType === d ? chipActiveStyle : chipInactiveStyle),
+                  ...chipSmallStyle,
+                  ...(volume === v && mode === 'volume' ? chipActiveStyle : chipInactiveStyle),
                 }}
               >
-                {d === 20 ? '成人用 20滴/mL' : '小児用 60滴/mL'}
+                {v}
               </button>
             ))}
           </div>
+
+          <label style={labelStyle}>時間 (h)</label>
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            {[1, 2, 3, 4, 6, 8, 12, 24].map(h => (
+              <button
+                key={h}
+                onClick={e => { e.stopPropagation(); setTimeH(h); setMode('volume'); stop(); }}
+                style={{
+                  ...chipSmallStyle,
+                  ...(timeH === h && mode === 'volume' ? chipActiveStyle : chipInactiveStyle),
+                }}
+              >
+                {h}
+              </button>
+            ))}
+          </div>
+
+          {mode === 'volume' && (
+            <div style={{
+              marginTop: 12,
+              background: 'linear-gradient(135deg, #EFF6FF, #DBEAFE)',
+              borderRadius: 10,
+              padding: '8px 10px',
+              textAlign: 'center',
+            }}>
+              <span style={{ fontSize: 11, color: '#64748B' }}>流速 </span>
+              <span style={{ fontSize: 18, fontWeight: 800, color: '#1D4ED8' }}>
+                {effectiveFlow.toFixed(1)}
+              </span>
+              <span style={{ fontSize: 11, color: '#64748B' }}> mL/h</span>
+            </div>
+          )}
+        </div>
+
+        {/* 右: 流速 */}
+        <div
+          onClick={() => { setMode('flow'); stop(); }}
+          style={{
+            ...panelStyle,
+            border: mode === 'flow' ? '2px solid #2563EB' : '2px solid transparent',
+            boxShadow: mode === 'flow'
+              ? '0 2px 12px rgba(37,99,235,0.15), 0 1px 3px rgba(0,0,0,0.04)'
+              : '0 2px 12px rgba(0,0,0,0.06)',
+            opacity: mode === 'flow' ? 1 : 0.55,
+            cursor: 'pointer',
+          }}
+        >
+          <div style={panelHeaderStyle}>
+            <span style={{
+              fontSize: 10,
+              fontWeight: 700,
+              color: mode === 'flow' ? '#2563EB' : '#94A3B8',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+            }}>
+              流速
+            </span>
+          </div>
+
+          <FlowRatePicker
+            value={flowRate}
+            onChange={v => { setFlowRate(v); setMode('flow'); stop(); }}
+          />
+        </div>
+      </div>
+
+      {/* 滴下筒 */}
+      <div style={cardStyle}>
+        <label style={labelStyle}>滴下筒タイプ</label>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {([20, 60] as DripType[]).map(d => (
+            <button
+              key={d}
+              onClick={() => { setDripType(d); stop(); }}
+              style={{
+                ...chipSmallStyle,
+                flex: 1,
+                padding: '10px 8px',
+                fontSize: 13,
+                ...(dripType === d ? chipActiveStyle : chipInactiveStyle),
+              }}
+            >
+              {d === 20 ? '成人用 20滴/mL' : '小児用 60滴/mL'}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -224,38 +242,41 @@ function ResultValue({ label, value, unit, highlight }: {
   );
 }
 
+const panelStyle: React.CSSProperties = {
+  background: '#FFF',
+  borderRadius: 18,
+  padding: 14,
+  transition: 'all 0.2s ease',
+};
+
+const panelHeaderStyle: React.CSSProperties = {
+  marginBottom: 12,
+  textAlign: 'center',
+};
+
 const cardStyle: React.CSSProperties = {
   background: '#FFF',
   borderRadius: 20,
-  padding: 22,
+  padding: 18,
   marginBottom: 16,
   boxShadow: '0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)',
   border: '1px solid rgba(0,0,0,0.04)',
 };
 
-const sectionHeaderStyle: React.CSSProperties = {
-  fontSize: 15,
-  fontWeight: 700,
-  color: '#1E293B',
-  marginBottom: 16,
-  display: 'flex',
-  alignItems: 'center',
-};
-
 const labelStyle: React.CSSProperties = {
-  fontSize: 12,
+  fontSize: 11,
   fontWeight: 600,
   color: '#64748B',
-  marginBottom: 8,
+  marginBottom: 6,
   display: 'block',
   letterSpacing: '0.3px',
 };
 
-const chipStyle: React.CSSProperties = {
-  padding: '9px 16px',
-  borderRadius: 10,
+const chipSmallStyle: React.CSSProperties = {
+  padding: '6px 10px',
+  borderRadius: 8,
   border: 'none',
-  fontSize: 14,
+  fontSize: 12,
   fontWeight: 600,
   cursor: 'pointer',
 };
@@ -270,14 +291,4 @@ const chipInactiveStyle: React.CSSProperties = {
   background: '#F1F5F9',
   color: '#475569',
   border: '1px solid #E2E8F0',
-};
-
-const numInputStyle: React.CSSProperties = {
-  width: 72,
-  padding: '9px 10px',
-  borderRadius: 10,
-  border: '1.5px solid #CBD5E1',
-  fontSize: 14,
-  textAlign: 'center',
-  background: '#FFF',
 };
