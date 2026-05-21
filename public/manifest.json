@@ -1,6 +1,6 @@
 {
-  "name": "点滴メトロノーム",
-  "short_name": "点滴メトロ",
+  "name": "Drip Calculator",
+  "short_name": "DripCalc",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F1F5F9",

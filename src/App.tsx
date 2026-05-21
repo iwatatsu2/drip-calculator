@@ -67,10 +67,10 @@ function App() {
             </div>
             <div>
               <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>
-                点滴メトロノーム
+                Drip Calculator
               </h1>
               <p style={{ fontSize: 11, margin: '2px 0 0', opacity: 0.7, letterSpacing: '0.5px' }}>
-                IV Drip Rate Calculator
+                点滴調整サポートツール
               </p>
             </div>
           </div>

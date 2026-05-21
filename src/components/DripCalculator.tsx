@@ -1,16 +1,32 @@
 import { useState, useMemo } from 'react';
-import { calcFlowRate, calcDripsPerMin, calcDripInterval, type DripType } from '../utils/dripCalc';
+import { calcDripsPerMin, calcDripInterval, type DripType } from '../utils/dripCalc';
 import { useMetronome } from '../hooks/useMetronome';
 import { DripAnimation } from './DripAnimation';
+import { FlowRatePicker } from './SlotPicker';
+
+type InputMode = 'flow' | 'volume';
 
 export function DripCalculator() {
+  const [mode, setMode] = useState<InputMode>('flow');
+
+  // 流速直接入力モード
+  const [flowRate, setFlowRate] = useState(80);
+
+  // 輸液量+時間モード
   const [volume, setVolume] = useState(500);
   const [timeH, setTimeH] = useState(6);
+
   const [dripType, setDripType] = useState<DripType>(20);
   const { isPlaying, start, stop } = useMetronome();
 
-  const flowRate = useMemo(() => calcFlowRate(volume, timeH), [volume, timeH]);
-  const dripsPerMin = useMemo(() => calcDripsPerMin(volume, timeH, dripType), [volume, timeH, dripType]);
+  const effectiveFlow = mode === 'flow' ? flowRate : (timeH > 0 ? volume / timeH : 0);
+  const dripsPerMin = useMemo(() => {
+    if (mode === 'flow') {
+      // 流速 → 滴下数: flowRate * dripFactor / 60
+      return effectiveFlow * dripType / 60;
+    }
+    return calcDripsPerMin(volume, timeH, dripType);
+  }, [mode, effectiveFlow, volume, timeH, dripType]);
   const intervalSec = useMemo(() => calcDripInterval(dripsPerMin), [dripsPerMin]);
 
   const handleToggle = () => {
@@ -23,68 +39,119 @@ export function DripCalculator() {
 
   return (
     <div style={{ padding: '20px 16px' }}>
+      {/* 入力モード切替 */}
+      <div style={{
+        display: 'flex',
+        background: '#F1F5F9',
+        borderRadius: 12,
+        padding: 3,
+        marginBottom: 16,
+      }}>
+        {([
+          { key: 'flow', label: '流速で設定' },
+          { key: 'volume', label: '量×時間で設定' },
+        ] as const).map(m => (
+          <button
+            key={m.key}
+            onClick={() => { setMode(m.key); stop(); }}
+            style={{
+              flex: 1,
+              padding: '10px 0',
+              borderRadius: 10,
+              border: 'none',
+              fontSize: 13,
+              fontWeight: mode === m.key ? 700 : 500,
+              color: mode === m.key ? '#FFF' : '#64748B',
+              background: mode === m.key ? 'linear-gradient(135deg, #2563EB, #3B82F6)' : 'transparent',
+              boxShadow: mode === m.key ? '0 2px 8px rgba(37,99,235,0.25)' : 'none',
+              cursor: 'pointer',
+            }}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+
       {/* 入力エリア */}
       <div style={cardStyle}>
-        <div style={sectionHeaderStyle}>
-          <span style={{ fontSize: 15, marginRight: 6 }}>⚙️</span>
-          設定
-        </div>
+        {mode === 'flow' ? (
+          <>
+            <div style={sectionHeaderStyle}>
+              <span style={{ fontSize: 15, marginRight: 6 }}>🎰</span>
+              流速を選択
+            </div>
+            <FlowRatePicker
+              value={flowRate}
+              onChange={v => { setFlowRate(v); stop(); }}
+            />
+          </>
+        ) : (
+          <>
+            <div style={sectionHeaderStyle}>
+              <span style={{ fontSize: 15, marginRight: 6 }}>⚙️</span>
+              設定
+            </div>
 
-        <label style={labelStyle}>輸液量 (mL)</label>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 18, flexWrap: 'wrap' }}>
-          {[100, 250, 500, 1000].map(v => (
-            <button
-              key={v}
-              onClick={() => { setVolume(v); stop(); }}
-              style={{
-                ...chipStyle,
-                ...(volume === v ? chipActiveStyle : chipInactiveStyle),
-              }}
-            >
-              {v}
-            </button>
-          ))}
-          <input
-            type="number"
-            value={volume}
-            onChange={e => { setVolume(Number(e.target.value)); stop(); }}
-            style={numInputStyle}
-            min={1}
-          />
-        </div>
+            <label style={labelStyle}>輸液量 (mL)</label>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 18, flexWrap: 'wrap' }}>
+              {[100, 250, 500, 1000].map(v => (
+                <button
+                  key={v}
+                  onClick={() => { setVolume(v); stop(); }}
+                  style={{
+                    ...chipStyle,
+                    ...(volume === v ? chipActiveStyle : chipInactiveStyle),
+                  }}
+                >
+                  {v}
+                </button>
+              ))}
+              <input
+                type="number"
+                value={volume}
+                onChange={e => { setVolume(Number(e.target.value)); stop(); }}
+                style={numInputStyle}
+                min={1}
+              />
+            </div>
 
-        <label style={labelStyle}>投与時間</label>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 18, flexWrap: 'wrap' }}>
-          {[1, 2, 3, 4, 6, 8, 12, 24].map(h => (
-            <button
-              key={h}
-              onClick={() => { setTimeH(h); stop(); }}
-              style={{
-                ...chipStyle,
-                ...(timeH === h ? chipActiveStyle : chipInactiveStyle),
-              }}
-            >
-              {h}h
-            </button>
-          ))}
-        </div>
+            <label style={labelStyle}>投与時間</label>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
+              {[1, 2, 3, 4, 6, 8, 12, 24].map(h => (
+                <button
+                  key={h}
+                  onClick={() => { setTimeH(h); stop(); }}
+                  style={{
+                    ...chipStyle,
+                    ...(timeH === h ? chipActiveStyle : chipInactiveStyle),
+                  }}
+                >
+                  {h}h
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
-        <label style={labelStyle}>滴下筒タイプ</label>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {([20, 60] as DripType[]).map(d => (
-            <button
-              key={d}
-              onClick={() => { setDripType(d); stop(); }}
-              style={{
-                ...chipStyle,
-                flex: 1,
-                padding: '10px 8px',
-                ...(dripType === d ? chipActiveStyle : chipInactiveStyle),
-              }}
-            >
-              {d === 20 ? '成人用 20滴/mL' : '小児用 60滴/mL'}
-            </button>
-          ))}
+        {/* 滴下筒 - 共通 */}
+        <div style={{ marginTop: 16 }}>
+          <label style={labelStyle}>滴下筒タイプ</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {([20, 60] as DripType[]).map(d => (
+              <button
+                key={d}
+                onClick={() => { setDripType(d); stop(); }}
+                style={{
+                  ...chipStyle,
+                  flex: 1,
+                  padding: '10px 8px',
+                  ...(dripType === d ? chipActiveStyle : chipInactiveStyle),
+                }}
+              >
+                {d === 20 ? '成人用 20滴/mL' : '小児用 60滴/mL'}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -96,17 +163,15 @@ export function DripCalculator() {
         textAlign: 'center',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: 8 }}>
-          <ResultValue label="流速" value={flowRate.toFixed(1)} unit="mL/h" />
+          <ResultValue label="流速" value={effectiveFlow.toFixed(1)} unit="mL/h" />
           <div style={{ width: 1, background: 'rgba(59,130,246,0.15)', margin: '4px 0' }} />
           <ResultValue label="滴下数" value={dripsPerMin.toFixed(1)} unit="滴/分" highlight />
           <div style={{ width: 1, background: 'rgba(59,130,246,0.15)', margin: '4px 0' }} />
           <ResultValue label="間隔" value={intervalSec.toFixed(1)} unit="秒/滴" />
         </div>
 
-        {/* アニメーション */}
         <DripAnimation intervalSec={intervalSec} isPlaying={isPlaying} />
 
-        {/* 再生ボタン */}
         <button
           onClick={handleToggle}
           style={{
