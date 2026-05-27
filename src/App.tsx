@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { DripCalculator } from './components/DripCalculator';
 import { MultiBagManager } from './components/MultiBagManager';
 import { QuickReference } from './components/QuickReference';
+import { ProfilePage } from './components/ProfilePage';
 
-type Page = 'calc' | 'multi' | 'ref';
+type Page = 'calc' | 'multi' | 'ref' | 'profile';
 
 const tabs: { key: Page; icon: string; label: string }[] = [
   { key: 'calc', icon: '♪', label: 'メトロノーム' },
@@ -51,7 +52,7 @@ function App() {
           borderRadius: '50%',
           background: 'rgba(255,255,255,0.05)',
         }} />
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 36,
@@ -74,106 +75,103 @@ function App() {
               </p>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* タブ */}
-      <div style={{
-        display: 'flex',
-        padding: '0 8px',
-        background: '#FFF',
-        borderBottom: '1px solid #E2E8F0',
-      }}>
-        {tabs.map(t => (
           <button
-            key={t.key}
-            onClick={() => setPage(t.key)}
+            onClick={() => setPage('profile')}
             style={{
-              flex: 1,
-              padding: '14px 0 12px',
-              border: 'none',
-              background: 'none',
-              fontSize: 13,
-              fontWeight: page === t.key ? 700 : 500,
-              color: page === t.key ? '#2563EB' : '#94A3B8',
-              borderBottom: page === t.key ? '3px solid #2563EB' : '3px solid transparent',
+              background: 'rgba(255,255,255,0.15)',
+              border: '1px solid rgba(255,255,255,0.3)',
+              borderRadius: 20,
+              padding: '4px 12px 4px 4px',
+              color: '#FFF',
+              fontSize: 12,
+              fontWeight: 600,
               cursor: 'pointer',
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              gap: 2,
+              gap: 6,
+              whiteSpace: 'nowrap',
             }}
           >
-            <span style={{ fontSize: 16 }}>{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* コンテンツ */}
-      <div style={{ animation: 'fadeInUp 0.3s ease' }} key={page}>
-        {page === 'calc' && <DripCalculator />}
-        {page === 'multi' && <MultiBagManager />}
-        {page === 'ref' && <QuickReference />}
-      </div>
-
-      {/* 制作者 */}
-      <div style={{ padding: '20px 16px 0' }}>
-        <div style={{
-          background: '#FFF',
-          borderRadius: 18,
-          padding: '18px 20px',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-          border: '1px solid rgba(0,0,0,0.04)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 14,
-        }}>
-          <div style={{
-            width: 48,
-            height: 48,
-            borderRadius: 14,
-            background: 'linear-gradient(135deg, #2563EB, #3B82F6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 24,
-            flexShrink: 0,
-          }}>
-            👨‍⚕️
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#1E293B' }}>Dr いわたつ</div>
-            <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>糖尿病・内分泌内科 専門医</div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <a href="https://www.instagram.com/dr.iwatatsu/" target="_blank" rel="noopener noreferrer" style={{
-                fontSize: 11, fontWeight: 600, color: '#E1306C', textDecoration: 'none',
-                background: '#FFF0F5', padding: '4px 10px', borderRadius: 6, border: '1px solid #FECDD3',
-              }}>
-                Instagram
-              </a>
-              <a href="https://driwatatsu.readdy.co/" target="_blank" rel="noopener noreferrer" style={{
-                fontSize: 11, fontWeight: 600, color: '#2563EB', textDecoration: 'none',
-                background: '#EFF6FF', padding: '4px 10px', borderRadius: 6, border: '1px solid #BFDBFE',
-              }}>
-                Homepage
-              </a>
+            <div style={{
+              width: 24,
+              height: 24,
+              borderRadius: '50%',
+              overflow: 'hidden',
+              flexShrink: 0,
+            }}>
+              <img
+                src="/dr-iwatatsu.png"
+                alt=""
+                style={{
+                  width: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'top',
+                  height: '200%',
+                }}
+              />
             </div>
-          </div>
+            Dr.いわたつ
+          </button>
         </div>
       </div>
 
-      {/* フッター */}
-      <div style={{
-        textAlign: 'center',
-        padding: '16px 16px 32px',
-        fontSize: 11,
-        color: '#94A3B8',
-        lineHeight: 1.6,
-      }}>
-        医療従事者の業務補助ツールです<br />
-        実際の投与は必ず医師の指示に従ってください
-      </div>
+      {page === 'profile' ? (
+        <ProfilePage onBack={() => setPage('calc')} />
+      ) : (
+        <>
+          {/* タブ */}
+          <div style={{
+            display: 'flex',
+            padding: '0 8px',
+            background: '#FFF',
+            borderBottom: '1px solid #E2E8F0',
+          }}>
+            {tabs.map(t => (
+              <button
+                key={t.key}
+                onClick={() => setPage(t.key)}
+                style={{
+                  flex: 1,
+                  padding: '14px 0 12px',
+                  border: 'none',
+                  background: 'none',
+                  fontSize: 13,
+                  fontWeight: page === t.key ? 700 : 500,
+                  color: page === t.key ? '#2563EB' : '#94A3B8',
+                  borderBottom: page === t.key ? '3px solid #2563EB' : '3px solid transparent',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 2,
+                }}
+              >
+                <span style={{ fontSize: 16 }}>{t.icon}</span>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* コンテンツ */}
+          <div style={{ animation: 'fadeInUp 0.3s ease' }} key={page}>
+            {page === 'calc' && <DripCalculator />}
+            {page === 'multi' && <MultiBagManager />}
+            {page === 'ref' && <QuickReference />}
+          </div>
+
+          {/* フッター */}
+          <div style={{
+            textAlign: 'center',
+            padding: '16px 16px 32px',
+            fontSize: 11,
+            color: '#94A3B8',
+            lineHeight: 1.6,
+          }}>
+            医療従事者の業務補助ツールです<br />
+            実際の投与は必ず医師の指示に従ってください
+          </div>
+        </>
+      )}
     </div>
   );
 }

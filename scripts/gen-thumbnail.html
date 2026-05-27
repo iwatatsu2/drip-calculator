@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  font-family: 'Noto Sans JP', sans-serif;
+  background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 40%, #2563EB 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* 装飾的な背景パターン */
+.bg-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.bg-circle.c1 { width: 500px; height: 500px; top: -150px; right: -100px; }
+.bg-circle.c2 { width: 300px; height: 300px; bottom: -100px; left: -50px; }
+.bg-circle.c3 { width: 200px; height: 200px; top: 200px; left: 100px; background: rgba(59,130,246,0.1); }
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  z-index: 1;
+}
+
+/* 左: 点滴アニメーション風イラスト */
+.drip-visual {
+  position: relative;
+  width: 220px;
+  height: 400px;
+  flex-shrink: 0;
+}
+
+.tube-top {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 60px;
+  background: linear-gradient(180deg, #94A3B8, #64748B);
+  border-radius: 5px;
+  top: 0;
+}
+
+.chamber {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 120px;
+  border: 4px solid #94A3B8;
+  border-radius: 30px;
+  top: 55px;
+  background: rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+
+.chamber-liquid {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 35%;
+  background: linear-gradient(180deg, rgba(59,130,246,0.3), rgba(59,130,246,0.6));
+  border-radius: 0 0 26px 26px;
+}
+
+.chamber-highlight {
+  position: absolute;
+  top: 10px;
+  left: 8px;
+  width: 10px;
+  height: 35px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 5px;
+}
+
+.drop {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 22px;
+  background: linear-gradient(180deg, #60A5FA, #2563EB);
+  border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%;
+  top: 100px;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.5);
+}
+
+.tube-bottom {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 200px;
+  background: linear-gradient(180deg, #64748B, #94A3B8);
+  border-radius: 5px;
+  top: 175px;
+}
+
+/* 波紋 */
+.ripple {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 140px;
+  width: 30px;
+  height: 8px;
+  border: 2px solid rgba(59,130,246,0.3);
+  border-radius: 50%;
+}
+
+/* 右: テキスト */
+.text-area {
+  color: #FFF;
+}
+
+.app-name {
+  font-size: 88px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -3px;
+  margin-bottom: 16px;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.app-name .line2 {
+  color: #93C5FD;
+}
+
+.subtitle {
+  font-size: 36px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 40px;
+  letter-spacing: 1px;
+}
+
+.features {
+  display: flex;
+  gap: 16px;
+}
+
+.feature-tag {
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 10px 22px;
+  font-size: 22px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+}
+
+.author {
+  position: absolute;
+  bottom: 30px;
+  right: 50px;
+  color: rgba(255,255,255,0.4);
+  font-size: 20px;
+  font-weight: 700;
+}
+</style>
+</head>
+<body>
+  <div class="bg-circle c1"></div>
+  <div class="bg-circle c2"></div>
+  <div class="bg-circle c3"></div>
+
+  <div class="content">
+    <div class="drip-visual">
+      <div class="tube-top"></div>
+      <div class="chamber">
+        <div class="chamber-liquid"></div>
+        <div class="chamber-highlight"></div>
+        <div class="drop"></div>
+      </div>
+      <div class="ripple"></div>
+      <div class="tube-bottom"></div>
+    </div>
+
+    <div class="text-area">
+      <div class="app-name">
+        Drip<br>
+        <span class="line2">Calculator</span>
+      </div>
+      <div class="subtitle">点滴調整サポートツール</div>
+      <div class="features">
+        <div class="feature-tag">🎵 メトロノーム</div>
+        <div class="feature-tag">📋 複数本管理</div>
+        <div class="feature-tag">⚡ 早見表</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="author">by Dr いわたつ</div>
+</body>
+</html>

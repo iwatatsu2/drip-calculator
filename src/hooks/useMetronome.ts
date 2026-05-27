@@ -13,12 +13,12 @@ export function useMetronome() {
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.frequency.value = 880;
-    osc.type = 'sine';
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    osc.frequency.value = 1000;
+    osc.type = 'square';
+    gain.gain.setValueAtTime(1.0, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
     osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.08);
+    osc.stop(ctx.currentTime + 0.15);
   }, []);
 
   const start = useCallback((intervalSec: number) => {
