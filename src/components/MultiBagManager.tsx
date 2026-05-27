@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { calcFlowRate, calcDripsPerMin, calcEndTime, calcRemainingMin, type BagInfo } from '../utils/dripCalc';
+import { calcFlowRate, calcDripsPerMin, calcEndTime, calcRemainingMin, type BagInfo, type DripType } from '../utils/dripCalc';
 
 function nowHHMM(): string {
   const d = new Date();
@@ -18,6 +18,7 @@ const BAG_COLORS = ['#2563EB', '#059669', '#D97706', '#7C3AED'];
 
 export function MultiBagManager() {
   const [bags, setBags] = useState<BagInfo[]>([emptyBag()]);
+  const [dripType, setDripType] = useState<DripType>(20);
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -59,11 +60,38 @@ export function MultiBagManager() {
         点滴を順番に登録すると、交換タイミングが一目でわかります
       </div>
 
+      {/* 滴下筒タイプ切替 */}
+      <div style={{
+        display: 'flex',
+        gap: 8,
+        marginBottom: 16,
+      }}>
+        {([20, 60] as DripType[]).map(t => (
+          <button
+            key={t}
+            onClick={() => setDripType(t)}
+            style={{
+              flex: 1,
+              padding: '10px 0',
+              borderRadius: 12,
+              border: dripType === t ? '2px solid #2563EB' : '2px solid #E2E8F0',
+              background: dripType === t ? '#EFF6FF' : '#FFF',
+              color: dripType === t ? '#2563EB' : '#64748B',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            {t === 20 ? '成人用（20滴/mL）' : '小児用（60滴/mL）'}
+          </button>
+        ))}
+      </div>
+
       {bags.map((bag, i) => {
         const endTime = calcEndTime(bag.startTime, bag.timeH);
         const remaining = calcRemainingMin(endTime, now);
         const flow = calcFlowRate(bag.volumeMl, bag.timeH);
-        const drips = calcDripsPerMin(bag.volumeMl, bag.timeH, 20);
+        const drips = calcDripsPerMin(bag.volumeMl, bag.timeH, dripType);
         const isUrgent = remaining <= 30;
         const color = BAG_COLORS[i];
 
